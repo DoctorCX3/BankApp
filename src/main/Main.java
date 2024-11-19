@@ -4,10 +4,25 @@
  */
 package main;
 
+import core.views.BankFrame;
+
 /**
  *
  * @author JULIAN CASTRO CALVO
  */
 public class Main {
+    
+    public static void main(String args[]) {
+        
+        
+        
+        /* Crea la vista */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new BankFrame().setVisible(true);
+            }
+        });
+        
+    }
     
 }
