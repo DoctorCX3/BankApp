@@ -4,13 +4,20 @@
  */
 package core.views;
 
-import core.models.TransactionType;
+import core.controllers.AccountController;
+import core.controllers.ListAccountsController;
+import core.controllers.ListTransactionsController;
+import core.controllers.ListUsersController;
+import core.controllers.TransactionController;
+import core.controllers.UserController;
+import core.controllers.utils.Response;
+import core.controllers.utils.Status;
+import core.models.transaction.TransactionType;
 import core.models.Account;
 import core.models.User;
-import core.models.Transaction;
+import core.models.transaction.Transaction;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -43,7 +50,7 @@ public class BankFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        pestañasTabbedPane = new javax.swing.JTabbedPane();
+        tabsTabbedPane = new javax.swing.JTabbedPane();
         registerUserPanel = new javax.swing.JPanel();
         registerUserLabel = new javax.swing.JLabel();
         registerUserIDLabel = new javax.swing.JLabel();
@@ -187,7 +194,7 @@ public class BankFrame extends javax.swing.JFrame {
                 .addContainerGap(83, Short.MAX_VALUE))
         );
 
-        pestañasTabbedPane.addTab("Register User", registerUserPanel);
+        tabsTabbedPane.addTab("Register User", registerUserPanel);
 
         createAccountLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         createAccountLabel.setText("Create Account");
@@ -248,7 +255,7 @@ public class BankFrame extends javax.swing.JFrame {
                 .addContainerGap(163, Short.MAX_VALUE))
         );
 
-        pestañasTabbedPane.addTab("Create Account", createAccountPanel);
+        tabsTabbedPane.addTab("Create Account", createAccountPanel);
 
         makeTransactionLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         makeTransactionLabel.setText("Make Transaction");
@@ -336,7 +343,7 @@ public class BankFrame extends javax.swing.JFrame {
                 .addContainerGap(83, Short.MAX_VALUE))
         );
 
-        pestañasTabbedPane.addTab("Make Transaction", makeTransactionPanel);
+        tabsTabbedPane.addTab("Make Transaction", makeTransactionPanel);
 
         listUsersLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         listUsersLabel.setText("List Users");
@@ -399,7 +406,7 @@ public class BankFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pestañasTabbedPane.addTab("List Users", listUsersPanel);
+        tabsTabbedPane.addTab("List Users", listUsersPanel);
 
         listAccountsLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         listAccountsLabel.setText("List Accounts");
@@ -460,7 +467,7 @@ public class BankFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pestañasTabbedPane.addTab("List Accounts", listAccountsPanel);
+        tabsTabbedPane.addTab("List Accounts", listAccountsPanel);
 
         listTransactionsLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         listTransactionsLabel.setText("List Transactions");
@@ -528,17 +535,17 @@ public class BankFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pestañasTabbedPane.addTab("List Transactions", listTransactionsPanel);
+        tabsTabbedPane.addTab("List Transactions", listTransactionsPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pestañasTabbedPane)
+            .addComponent(tabsTabbedPane)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pestañasTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(tabsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -547,12 +554,18 @@ public class BankFrame extends javax.swing.JFrame {
     private void regisUserRegisterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regisUserRegisterButtonActionPerformed
         // TODO add your handling code here:
         try {
-            int id = Integer.parseInt(regisUserIDTextField.getText());
+            String id = regisUserIDTextField.getText();
             String firstname = regisUserFirstnameTextField.getText();
             String lastname = regisUserLastnameTextField.getText();
-            int age = Integer.parseInt(regisUserAgeTextField.getText());
+            String age = regisUserAgeTextField.getText();
             
-            this.users.add(new User(id, firstname, lastname, age));
+            Response response = UserController.registerUser(id, firstname, lastname, age);
+            
+            if (response.getStatus()== Status.CREATED){
+                JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
             
             regisUserIDTextField.setText("");
             regisUserFirstnameTextField.setText("");
@@ -566,29 +579,19 @@ public class BankFrame extends javax.swing.JFrame {
     private void cAccountCreateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cAccountCreateButtonActionPerformed
         // TODO add your handling code here:
         try {
-            int userId = Integer.parseInt(cAccountIDTextField.getText());
-            double initialBalance = Double.parseDouble(cAccountInitBalanTextField.getText());
+            String userId = cAccountIDTextField.getText();
+            String initialBalance = cAccountInitBalanTextField.getText();
             
-            User selectedUser = null;
-            for (User user : this.users) {
-                if (user.getId() == userId && selectedUser == null) {
-                    selectedUser = user;
-                }
+            Response response = AccountController.createAccount(userId, initialBalance);
+
+            if (response.getStatus() == Status.CREATED) {
+                JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
             
-            if (selectedUser != null) {
-                Random random = new Random();
-                int first = random.nextInt(1000);
-                int second = random.nextInt(1000000);
-                int third = random.nextInt(100);
-                
-                String accountId = String.format("%03d", first) + "-" + String.format("%06d", second) + "-" + String.format("%02d", third);
-                
-                this.accounts.add(new Account(accountId, selectedUser, initialBalance));
-                
-                cAccountIDTextField.setText("");
-                cAccountInitBalanTextField.setText("");
-            }
+            cAccountIDTextField.setText("");
+            cAccountInitBalanTextField.setText("");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Error", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -596,75 +599,24 @@ public class BankFrame extends javax.swing.JFrame {
 
     private void mTransacExecuteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mTransacExecuteButtonActionPerformed
         // TODO add your handling code here:
-        try {
+        try{
             String type = mTransacTypeButton.getItemAt(mTransacTypeButton.getSelectedIndex());
-            switch (type) {
-                case "Deposit": {
-                    String destinationAccountId = mTransacDestAccTextField.getText();
-                    double amount = Double.parseDouble(mTransacAmountTextField.getText());
-                    
-                    Account destinationAccount = null;
-                    for (Account account : this.accounts) {
-                        if (account.getId().equals(destinationAccountId)) {
-                            destinationAccount = account;
-                        }
-                    }
-                    if (destinationAccount != null) {
-                        destinationAccount.deposit(amount);
-                        
-                        this.transactions.add(new Transaction(TransactionType.DEPOSIT, null, destinationAccount, amount));
-                        
-                        mTransacSourAccTextField.setText("");
-                        mTransacDestAccTextField.setText("");
-                        mTransacAmountTextField.setText("");
-                    }
+            String sourceAccountId = mTransacSourAccTextField.getText();
+            String destinationAccountId = mTransacDestAccTextField.getText();
+            String amount = mTransacAmountTextField.getText();
+            Response response = new Response("", Status.INTERNAL_SERVER_ERROR);
+
+            switch (type){
+                case "Deposit":{
+                    response = TransactionController.deposit(destinationAccountId, amount);
                     break;
                 }
-                case "Withdraw": {
-                    String sourceAccountId = mTransacSourAccTextField.getText();
-                    double amount = Double.parseDouble(mTransacAmountTextField.getText());
-                    
-                    Account sourceAccount = null;
-                    for (Account account : this.accounts) {
-                        if (account.getId().equals(sourceAccountId)) {
-                            sourceAccount = account;
-                        }
-                    }
-                    if (sourceAccount != null && sourceAccount.withdraw(amount)) {
-                        this.transactions.add(new Transaction(TransactionType.WITHDRAW, sourceAccount, null, amount));
-                        
-                        mTransacSourAccTextField.setText("");
-                        mTransacDestAccTextField.setText("");
-                        mTransacAmountTextField.setText("");
-                    }
+                case "Withdraw":{
+                    response = TransactionController.withdraw(sourceAccountId, amount);
                     break;
                 }
-                case "Transfer": {
-                    String sourceAccountId = mTransacSourAccTextField.getText();
-                    String destinationAccountId = mTransacDestAccTextField.getText();
-                    double amount = Double.parseDouble(mTransacAmountTextField.getText());
-                    
-                    Account sourceAccount = null;
-                    Account destinationAccount = null;
-                    for (Account account : this.accounts) {
-                        if (account.getId().equals(sourceAccountId)) {
-                            sourceAccount = account;
-                        }
-                    }
-                    for (Account account : this.accounts) {
-                        if (account.getId().equals(destinationAccountId)) {
-                            destinationAccount = account;
-                        }
-                    }
-                    if (sourceAccount != null && destinationAccount != null && sourceAccount.withdraw(amount)) {
-                        destinationAccount.deposit(amount);
-                        
-                        this.transactions.add(new Transaction(TransactionType.TRANSFER, sourceAccount, destinationAccount, amount));
-                        
-                        mTransacSourAccTextField.setText("");
-                        mTransacDestAccTextField.setText("");
-                        mTransacAmountTextField.setText("");
-                    }
+                case "Transfer":{
+                    response = TransactionController.transfer(sourceAccountId, destinationAccountId, amount);
                     break;
                 }
                 default: {
@@ -674,6 +626,13 @@ public class BankFrame extends javax.swing.JFrame {
                     break;
                 }
             }
+            
+            if (response.getStatus() == Status.OK) {
+                JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Error", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -682,37 +641,38 @@ public class BankFrame extends javax.swing.JFrame {
     private void listUsersRefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listUsersRefreshButtonActionPerformed
         // TODO add your handling code here:
         DefaultTableModel model = (DefaultTableModel) listUsersTable.getModel();
-        model.setRowCount(0);
+        Response response = ListUsersController.refreshUsers(model);
         
-        this.users.sort((obj1, obj2) -> (obj1.getId() - obj2.getId()));
-        
-        for (User user : this.users) {
-            model.addRow(new Object[]{user.getId(), user.getFirstname() + " " + user.getLastname(), user.getAge(), user.getNumAccounts()});
+        if (response.getStatus() == Status.OK) {
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+        
     }//GEN-LAST:event_listUsersRefreshButtonActionPerformed
 
     private void listAccountsRefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listAccountsRefreshButtonActionPerformed
         // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) listAccountsTable.getModel();
-        model.setRowCount(0);
+        DefaultTableModel model = (DefaultTableModel) listAccountsTable.getModel();        
+        Response response = ListAccountsController.refreshAccounts(model);
         
-        this.accounts.sort((obj1, obj2) -> (obj1.getId().compareTo(obj2.getId())));
-        
-        for (Account account : this.accounts) {
-            model.addRow(new Object[]{account.getId(), account.getOwner().getId(), account.getBalance()});
+        if (response.getStatus() == Status.OK) {
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+        
     }//GEN-LAST:event_listAccountsRefreshButtonActionPerformed
 
     private void listTransactioRefreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listTransactioRefreshButtonActionPerformed
         // TODO add your handling code here:
         DefaultTableModel model = (DefaultTableModel) listTransactionsTable.getModel();
-        model.setRowCount(0);
+        Response response = ListTransactionsController.refreshTransactions(model);
         
-        ArrayList<Transaction> transactionsCopy = (ArrayList<Transaction>) this.transactions.clone();
-        Collections.reverse(transactionsCopy);
-        
-        for (Transaction transaction : transactionsCopy) {
-            model.addRow(new Object[]{transaction.getType().name(), (transaction.getSourceAccount() != null ? transaction.getSourceAccount().getId() : "None"), (transaction.getDestinationAccount()!= null ? transaction.getDestinationAccount().getId() : "None"), transaction.getAmount()});
+        if (response.getStatus() == Status.OK) {
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_listTransactioRefreshButtonActionPerformed
 
@@ -735,37 +695,7 @@ public class BankFrame extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(BankFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(BankFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(BankFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(BankFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new BankFrame().setVisible(true);
-            }
-        });
-    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cAccountCreateButton;
@@ -801,7 +731,6 @@ public class BankFrame extends javax.swing.JFrame {
     private javax.swing.JLabel makeTransacTypeLabel;
     private javax.swing.JLabel makeTransactionLabel;
     private javax.swing.JPanel makeTransactionPanel;
-    private javax.swing.JTabbedPane pestañasTabbedPane;
     private javax.swing.JTextField regisUserAgeTextField;
     private javax.swing.JTextField regisUserFirstnameTextField;
     private javax.swing.JTextField regisUserIDTextField;
@@ -813,5 +742,6 @@ public class BankFrame extends javax.swing.JFrame {
     private javax.swing.JLabel registerUserLabel;
     private javax.swing.JLabel registerUserLastnameLabel;
     private javax.swing.JPanel registerUserPanel;
+    private javax.swing.JTabbedPane tabsTabbedPane;
     // End of variables declaration//GEN-END:variables
 }

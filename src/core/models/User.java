@@ -10,7 +10,7 @@ import java.util.ArrayList;
  *
  * @author edangulo
  */
-public class User {
+public class User implements UserInterface{
     
     private int id;
     private String firstname;
@@ -26,27 +26,30 @@ public class User {
         this.accounts = new ArrayList<>();
     }
 
-    public int getId() {
+    @Override
+    public int getId() { /**/
         return id;
     }
 
-    public String getFirstname() {
+    public String getFirstname() { /**/
         return firstname;
     }
 
-    public String getLastname() {
+    public String getLastname() { /**/
         return lastname;
     }
 
-    public int getAge() {
+    public int getAge() { /**/
         return age;
     }
     
-    public int getNumAccounts() {
+    public int getNumAccounts() { /**/
         return this.accounts.size();
     }
     
-    public void addAccount(Account account) {
+    
+    @Override
+    public void addAccount(Account account) { /**/
         this.accounts.add(account);
     }
     
